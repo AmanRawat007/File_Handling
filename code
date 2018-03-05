@@ -1,0 +1,168 @@
+#include<stdio.h>
+#include<string.h>
+int main()
+{
+    struct Book
+    {
+        char code[10];
+        char b1name[20];
+        char auth[30];
+        float price;
+
+    } b;
+
+    FILE *fp,*ft;
+    fp=fopen("Books.txt","rb+");
+    char another='y',choicem;
+    int choice;
+    char codem[10];
+    int flam=0;
+
+    while(1)
+    {
+        printf("Enter\n1.Add books\n2.Modify books' info\n3.Delete Books' Records\n4.View Books' Record\n5.Exit\n");
+        //fflush(stdin);
+        scanf("%d",&choice);
+
+        switch(choice)
+        {
+        case 1:
+            fseek(fp,0,SEEK_END);
+            another='y';
+            while(another=='y'|| another=='Y')
+            {
+                printf("Enter the Following details about book\n");
+                printf("Code_no:\t");
+                fflush(stdin);
+                scanf("%s",b.code);
+                printf("\nBook Name:\t");
+                fflush(stdin);
+                gets(b.b1name);
+                printf("\nAuthor:\t");
+                fflush(stdin);
+                gets(b.auth);
+                printf("\nPrice:\t");
+                fflush(stdin);
+                scanf("%f",&b.price);
+                fwrite(&b,sizeof(b),1,fp);
+                printf("\nWant to add another record\n");
+                fflush(stdin);
+                scanf("%c",&another);
+            }
+            break;
+
+        case 2:
+            another='y';
+            while(another=='Y'||another=='y')
+            {
+                printf("Enter the code of the book you want to modify\n");
+                fflush(stdin);
+                scanf("%s",&codem);
+                rewind(fp);
+                while(fread(&b,sizeof(b),1,fp)==1)
+                {
+                    if(strcmp(b.code,codem)==0)
+                    {
+                        flam=1;
+                        printf("What would you like to modify\n");
+                        printf("1.Code\t2.Name\t3.Author\t4.Price\n");
+                        fflush(stdin);
+                        scanf("%c",&choicem);
+                        switch(choicem)
+                        {
+                        case '1':
+                            printf("Enter the new code:\t");
+                            fflush(stdin);
+                            scanf("%s",b.code);
+                            fseek(fp,-sizeof(b),SEEK_CUR);
+                            fwrite(&b,sizeof(b),1,fp);
+                            break;
+
+                        case '2':
+                            printf("Enter the new Name:\t");
+                            fflush(stdin);
+                            gets(b.b1name);
+                            fseek(fp,-sizeof(b),SEEK_CUR);
+                            fwrite(&b,sizeof(b),1,fp);
+                            break;
+
+                        case '3':
+                            printf("Enter the new Authour:\t");
+                            fflush(stdin);
+                            gets(b.auth);
+                            fseek(fp,-sizeof(b),SEEK_CUR);
+                            fwrite(&b,sizeof(b),1,fp);
+                            break;
+
+                        case '4':
+                            printf("Enter the new Price:\t");
+                            fflush(stdin);
+                            scanf("%f",b.price);
+                            fseek(fp,-sizeof(b),SEEK_CUR);
+                            fwrite(&b,sizeof(b),1,fp);
+                            break;
+
+
+                        }
+                        break;
+
+                    }
+                }
+                if(flam==0)
+                {
+                    printf("Record Not Found!!!\n");
+                }
+
+                printf("Want to modify another record?\n");
+                fflush(stdin);
+                scanf("%c",&another);
+            }
+            break;
+
+
+        case 3:
+            another='y';
+            while(another=='y'||another=='Y')
+            {
+                printf("Enter the code of the book you want to delete\n");
+                scanf("%s",&codem);
+                ft=fopen("Temp.dat","w");
+                rewind(fp);
+                while(fread(&b,sizeof(b),1,fp)==1)
+                {
+                    if(strcmp(b.code,codem)!=0)
+                    {
+                        fwrite(&b,sizeof(b),1,ft);
+
+                    }
+
+                }
+                fclose(fp);
+                fclose(ft);
+                remove("Books.dat");
+                rename("Temp.dat","Books.dat");
+                fp=fopen("Books.dat","rb+");
+                printf("\nWant to delete another record\n");
+                fflush(stdin);
+                scanf("%c",&another);
+            }
+            break;
+
+        case 4:
+            rewind(fp);
+            printf("B_Code \t Name    \t Author     \tPrice\n");
+
+            while(fread(&b,sizeof(b),1,fp)==1)
+            {
+                printf("%-8s %4s    10%s   %11.2f\n",b.code,b.b1name,b.auth,b.price);
+            }
+            break;
+
+        case 5:
+            fclose(fp);
+            exit(1);
+
+        }
+    }
+
+}
